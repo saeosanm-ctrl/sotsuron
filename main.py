@@ -22,6 +22,8 @@ ACCESS_KEY = os.environ["RAKUTEN_ACCESS_KEY"]
 url = "https://openapi.rakuten.co.jp/engine/api/Travel/VacantHotelSearch/20170426"
 
 headers = {
+    "Referer": "https://example.com",
+    "Origin": "https://example.com",
     "User-Agent": "Mozilla/5.0",
     "Accept": "application/json"
 }
