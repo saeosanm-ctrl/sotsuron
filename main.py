@@ -41,7 +41,7 @@ params = {
     "smallClassCode": "fukuoka",
     "applicationId": APP_ID,
     "accessKey": ACCESS_KEY,
-    "page": 50
+    #"page": 50
 }
 
 # =========================
