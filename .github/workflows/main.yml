@@ -2,7 +2,7 @@ name: Run Rakuten API Daily
 
 on:
   schedule:
-    - cron: '40 13 * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
