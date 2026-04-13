@@ -5,22 +5,17 @@ import os
 import time
 
 # =========================
-# 日付設定（明日宿泊）
+# 日付設定
 # =========================
 today = datetime.now()
 checkin = (today + timedelta(days=1)).strftime("%Y-%m-%d")
 checkout = (today + timedelta(days=2)).strftime("%Y-%m-%d")
 
 # =========================
-# APIキー（GitHub Secrets）
+# APIキー
 # =========================
 APP_ID = os.environ["RAKUTEN_APP_ID"]
 ACCESS_KEY = os.environ["RAKUTEN_ACCESS_KEY"]
-
-# =========================
-# 地域リスト（7地域）
-# =========================
-areas = ["fukuoka"]
 
 # =========================
 # API設定
@@ -34,83 +29,77 @@ headers = {
     "Accept": "application/json"
 }
 
+# =========================
+# 全件取得ループ
+# =========================
 all_rows = []
+page = 1
 
-# =========================
-# 地域ごとループ
-# =========================
-for area in areas:
-    print(f"===== 地域: {area} =====")
+while True:
+    print(f"ページ取得中: {page}")
 
-    page = 1
+    params = {
+        "format": "json",
+        "checkinDate": checkin,
+        "checkoutDate": checkout,
+        "largeClassCode": "japan",
+        "middleClassCode": "hukuoka",
+        "smallClassCode": "fukuoka",
+        "applicationId": APP_ID,
+        "accessKey": ACCESS_KEY,
+        "hits": 100,   # 最大取得
+        "page": page
+    }
 
-    while True:
-        print(f"{area} ページ: {page}")
+    res = requests.get(url, params=params, headers=headers)
+    data = res.json()
 
-        params = {
-            "format": "json",
-            "checkinDate": checkin,
-            "checkoutDate": checkout,
-            "largeClassCode": "japan",
-            "middleClassCode": "hukuoka",
-            "smallClassCode": area,
-            "applicationId": APP_ID,
-            "accessKey": ACCESS_KEY,
-            "hits": 100,   # 最大件数
-            "page": page
-        }
+    hotels = data.get("hotels", [])
 
-        res = requests.get(url, params=params, headers=headers)
-        data = res.json()
+    print("取得件数:", len(hotels))
 
-        hotels = data.get("hotels", [])
+    # データがなければ終了
+    if len(hotels) == 0:
+        break
 
-        print("取得件数:", len(hotels))
+    # =========================
+    # データ整形
+    # =========================
+    for item in hotels:
+        hotel_blocks = item["hotel"]
+        row = {}
 
-        # データがなければ終了
-        if len(hotels) == 0:
-            break
+        for block in hotel_blocks:
 
-        # =========================
-        # データ整形
-        # =========================
-        for item in hotels:
-            hotel_blocks = item["hotel"]
-            row = {}
+            if "hotelBasicInfo" in block:
+                for k, v in block["hotelBasicInfo"].items():
+                    row[f"basic_{k}"] = v
 
-            # 地域情報（超重要）
-            row["area"] = area
+            if "roomInfo" in block:
+                for room in block["roomInfo"]:
 
-            for block in hotel_blocks:
+                    if "roomBasicInfo" in room:
+                        for k, v in room["roomBasicInfo"].items():
+                            row[f"room_{k}"] = v
 
-                if "hotelBasicInfo" in block:
-                    for k, v in block["hotelBasicInfo"].items():
-                        row[f"basic_{k}"] = v
+                    if "dailyCharge" in room:
+                        for k, v in room["dailyCharge"].items():
+                            row[f"charge_{k}"] = v
 
-                if "roomInfo" in block:
-                    for room in block["roomInfo"]:
+        all_rows.append(row)
 
-                        if "roomBasicInfo" in room:
-                            for k, v in room["roomBasicInfo"].items():
-                                row[f"room_{k}"] = v
+    # 次のページへ
+    page += 1
 
-                        if "dailyCharge" in room:
-                            for k, v in room["dailyCharge"].items():
-                                row[f"charge_{k}"] = v
-
-            all_rows.append(row)
-
-        page += 1
-
-        # API制限対策
-        time.sleep(1)
+    # API制限対策（超重要）
+    time.sleep(1)
 
 # =========================
 # CSV保存
 # =========================
 df = pd.DataFrame(all_rows)
 
-filename = f"fukuoka_all_{today.strftime('%Y%m%d')}.csv"
+filename = f"fukuoka_{today.strftime('%Y%m%d')}.csv"
 df.to_csv(filename, index=False, encoding="cp932")
 
 print("完了:", filename)
