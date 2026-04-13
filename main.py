@@ -32,11 +32,11 @@ headers = {
 # =========================
 # 全件取得ループ
 # =========================
-all_rows = []
-page = 1
+#all_rows = []
+#page = 1
 
-while True:
-    print(f"ページ取得中: {page}")
+#while True:
+    #print(f"ページ取得中: {page}")
 
     params = {
         "format": "json",
@@ -47,7 +47,7 @@ while True:
         "smallClassCode": "fukuoka",
         "applicationId": APP_ID,
         "accessKey": ACCESS_KEY,
-        "hits": 100,   # 最大取得
+        #"hits": 100,   # 最大取得
         #"page": page
     }
 
