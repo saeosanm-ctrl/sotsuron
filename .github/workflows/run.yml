@@ -36,6 +36,10 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
+      
           git add *.csv
           git commit -m "add csv" || echo "No changes"
+      
+          git pull --rebase origin main || echo "rebase skip"
+      
           git push
