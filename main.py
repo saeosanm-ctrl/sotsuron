@@ -48,7 +48,7 @@ while True:
         "applicationId": APP_ID,
         "accessKey": ACCESS_KEY,
         "hits": 100,   # 最大取得
-        "page": page
+        #"page": page
     }
 
     res = requests.get(url, params=params, headers=headers)
