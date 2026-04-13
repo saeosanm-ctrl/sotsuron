@@ -2,6 +2,7 @@ import requests
 import pandas as pd
 from datetime import datetime, timedelta
 import os
+import time
 
 # =========================
 # 日付設定（明日宿泊）
@@ -22,7 +23,7 @@ ACCESS_KEY = os.environ["RAKUTEN_ACCESS_KEY"]
 url = "https://openapi.rakuten.co.jp/engine/api/Travel/VacantHotelSearch/20170426"
 
 headers = {
-    "Referer": "https://exaple.com",
+    "Referer": "https://example.com",
     "Origin": "https://example.com",
     "User-Agent": "Mozilla/5.0",
     "Accept": "application/json",
@@ -30,64 +31,85 @@ headers = {
 }
 
 # =========================
-# パラメータ（福岡市だけ）
+# ページループ
 # =========================
-params = {
-    "format": "json",
-    "checkinDate": checkin,
-    "checkoutDate": checkout,
-    "largeClassCode": "japan",
-    "middleClassCode": "hukuoka",
-    "smallClassCode": "fukuoka",
-    "applicationId": APP_ID,
-    "accessKey": ACCESS_KEY,
-    #"page": 50
-}
+all_rows = []
+page = 1
 
-# =========================
-# API実行
-# =========================
-res = requests.get(url, params=params, headers=headers)
-data = res.json()
+while True:
+    print(f"ページ: {page}")
 
-print("ステータス:", res.status_code)
-print("取得件数:", len(data.get("hotels", [])))
+    params = {
+        "format": "json",
+        "checkinDate": checkin,
+        "checkoutDate": checkout,
+        "largeClassCode": "japan",
+        "middleClassCode": "hukuoka",
+        "smallClassCode": "fukuoka",
+        "applicationId": APP_ID,
+        "accessKey": ACCESS_KEY,
+        "hits": 30,
+        "page": page
+    }
 
-rows = []
+    res = requests.get(url, params=params, headers=headers)
+    data = res.json()
 
-# =========================
-# データ整形
-# =========================
-for item in data.get("hotels", []):
-    hotel_blocks = item["hotel"]
-    row = {}
+    print("ステータス:", res.status_code)
+    print("取得件数:", len(data.get("hotels", [])))
 
-    for block in hotel_blocks:
+    hotels = data.get("hotels", [])
 
-        if "hotelBasicInfo" in block:
-            for k, v in block["hotelBasicInfo"].items():
-                row[f"basic_{k}"] = v
+    # 0件なら終了
+    if len(hotels) == 0:
+        print("データ終了")
+        break
 
-        if "roomInfo" in block:
-            for room in block["roomInfo"]:
+    # =========================
+    # データ整形
+    # =========================
+    for item in hotels:
+        hotel_blocks = item["hotel"]
+        row = {}
 
-                if "roomBasicInfo" in room:
-                    for k, v in room["roomBasicInfo"].items():
-                        row[f"room_{k}"] = v
+        for block in hotel_blocks:
 
-                if "dailyCharge" in room:
-                    for k, v in room["dailyCharge"].items():
-                        row[f"charge_{k}"] = v
+            if "hotelBasicInfo" in block:
+                for k, v in block["hotelBasicInfo"].items():
+                    row[f"basic_{k}"] = v
 
-    rows.append(row)
+            if "roomInfo" in block:
+                for room in block["roomInfo"]:
+
+                    if "roomBasicInfo" in room:
+                        for k, v in room["roomBasicInfo"].items():
+                            row[f"room_{k}"] = v
+
+                    if "dailyCharge" in room:
+                        for k, v in room["dailyCharge"].items():
+                            row[f"charge_{k}"] = v
+
+        all_rows.append(row)
+
+    # 次ページ
+    page += 1
+
+    # API制限対策
+    time.sleep(1)
+
+    # 無限ループ防止（超重要）
+    if page > 5:
+        print("強制終了（安全対策）")
+        break
 
 # =========================
 # CSV保存
 # =========================
-df = pd.DataFrame(rows)
+df = pd.DataFrame(all_rows)
 
-filename = f"fukuoka_{today.strftime('%Y%m%d')}.csv"
+filename = f"fukuoka_page_{today.strftime('%Y%m%d')}.csv"
 df.to_csv(filename, index=False, encoding="cp932")
 
 print("完了:", filename)
+print("総件数:", len(df))
 print(df.head())
