@@ -2,12 +2,16 @@ name: Run Rakuten API Daily
 
 on:
   schedule:
-    - cron: '0 23 * * *'
+    - cron: '0 12 * * *'
   workflow_dispatch:
-  
+
 jobs:
   run:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        area: [fukuoka, seibu, kitakyusyu, chikuzen, kurume, buzen, chikugo]
 
     steps:
       - name: コード取得
@@ -21,13 +25,14 @@ jobs:
       - name: ライブラリインストール
         run: pip install -r requirements.txt
 
-      - name: スクリプト実行
+      - name: 実行
         env:
+          AREA: ${{ matrix.area }}
           RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APP_ID }}
           RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
         run: python main.py
 
-      - name: CSVをコミット＆プッシュ（安全版）
+      - name: CSV保存
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
