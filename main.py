@@ -10,6 +10,7 @@ import time
 today = datetime.now()
 checkin = (today + timedelta(days=1)).strftime("%Y-%m-%d")
 checkout = (today + timedelta(days=2)).strftime("%Y-%m-%d")
+AREA = os.environ["AREA"]
 
 # =========================
 # APIキー
@@ -45,7 +46,7 @@ while True:
         "checkoutDate": checkout,
         "largeClassCode": "japan",
         "middleClassCode": "hukuoka",
-        "smallClassCode": "fukuoka",
+        "smallClassCode": AREA,
         "applicationId": APP_ID,
         "accessKey": ACCESS_KEY,
         "hits": 30,
@@ -107,7 +108,7 @@ while True:
 # =========================
 df = pd.DataFrame(all_rows)
 
-filename = f"fukuoka_page_{today.strftime('%Y%m%d')}.csv"
+filename = f"{AREA}_{today.strftime('%Y%m%d')}.csv"
 df.to_csv(filename, index=False, encoding="utf-8")
 
 print("完了:", filename)
