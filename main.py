@@ -98,7 +98,7 @@ while True:
     time.sleep(1)
 
     # 無限ループ防止（超重要）
-    if page > 5:
+    if page > 10:
         print("強制終了（安全対策）")
         break
 
@@ -108,7 +108,7 @@ while True:
 df = pd.DataFrame(all_rows)
 
 filename = f"fukuoka_page_{today.strftime('%Y%m%d')}.csv"
-df.to_csv(filename, index=False, encoding="cp932")
+df.to_csv(filename, index=False, encoding="utf-8")
 
 print("完了:", filename)
 print("総件数:", len(df))
