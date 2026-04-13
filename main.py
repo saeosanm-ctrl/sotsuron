@@ -41,7 +41,7 @@ params = {
     "smallClassCode": "fukuoka",
     "applicationId": APP_ID,
     "accessKey": ACCESS_KEY,
-    "hits": 100   # ←ここだけ追加
+    #"hits": 100
 }
 
 # =========================
