@@ -2,7 +2,7 @@ name: Run Rakuten API Daily
 
 on:
   schedule:
-    - cron: '0 8 * * *'  # 日本時間17時
+    - cron: '0 12 * * *'  # 日本時間17時
   workflow_dispatch:
 
 jobs:
