@@ -20,15 +20,7 @@ ACCESS_KEY = os.environ["RAKUTEN_ACCESS_KEY"]
 # =========================
 # 地域リスト（7地域）
 # =========================
-areas = [
-    "fukuoka",
-    "seibu",
-    "kitakyusyu",
-    "chikuzen",
-    "kurume",
-    "buzen",
-    "chikugo"
-]
+areas = ["fukuoka"]
 
 # =========================
 # API設定
