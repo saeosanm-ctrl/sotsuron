@@ -51,12 +51,12 @@ params = {
     #"page": page
 }
 
-    res = requests.get(url, params=params, headers=headers)
-    data = res.json()
+res = requests.get(url, params=params, headers=headers)
+data = res.json()
 
-    hotels = data.get("hotels", [])
+hotels = data.get("hotels", [])
 
-    print("取得件数:", len(hotels))
+print("取得件数:", len(hotels))
 
     # データがなければ終了
     #if len(hotels) == 0:
