@@ -43,6 +43,8 @@ params = {
 res = requests.get(url, params=params, headers=headers)
 data = res.json()
 
+print(data)
+
 rows = []
 
 for item in data.get("hotels", []):
