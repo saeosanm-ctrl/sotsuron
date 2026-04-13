@@ -38,18 +38,18 @@ headers = {
 #while True:
     #print(f"ページ取得中: {page}")
 
-    params = {
-        "format": "json",
-        "checkinDate": checkin,
-        "checkoutDate": checkout,
-        "largeClassCode": "japan",
-        "middleClassCode": "hukuoka",
-        "smallClassCode": "fukuoka",
-        "applicationId": APP_ID,
-        "accessKey": ACCESS_KEY,
-        #"hits": 100,   # 最大取得
-        #"page": page
-    }
+params = {
+    "format": "json",
+    "checkinDate": checkin,
+    "checkoutDate": checkout,
+    "largeClassCode": "japan",
+    "middleClassCode": "hukuoka",
+    "smallClassCode": "fukuoka",
+    "applicationId": APP_ID,
+    "accessKey": ACCESS_KEY,
+    #"hits": 100,   # 最大取得
+    #"page": page
+}
 
     res = requests.get(url, params=params, headers=headers)
     data = res.json()
@@ -59,8 +59,8 @@ headers = {
     print("取得件数:", len(hotels))
 
     # データがなければ終了
-    if len(hotels) == 0:
-        break
+    #if len(hotels) == 0:
+        #break
 
     # =========================
     # データ整形
