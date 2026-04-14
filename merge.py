@@ -59,7 +59,7 @@ for f in files:
 for date, df_list in date_groups.items():
     merged = pd.concat(df_list, ignore_index=True)
 
-    filename = f"merged_{today}_{date}.csv"
+    filename = f"merged-{today}-{date}.csv"
     merged.to_csv(filename, index=False, encoding="utf-8-sig")
 
     print("保存:", filename, "件数:", len(merged))
