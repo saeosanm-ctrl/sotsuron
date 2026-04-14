@@ -22,7 +22,7 @@ headers = {
 # =========================
 # ★ 取得日（3パターン）
 # =========================
-today = datetime.now()
+today = datetime.utcnow()+timedelta(hours=9)
 
 target_days = [
     today,
