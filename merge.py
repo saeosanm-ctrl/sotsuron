@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 # =========================
 # データ取得日（今日）
 # =========================
-today = datetime.utcnow()+timedelta(hours=9).strftime("%Y%m%d_%H%M")
+today = (datetime.utcnow()+timedelta(hours=9)).strftime("%Y%m%d_%H%M")
 
 # =========================
 # CSV取得
