@@ -39,30 +39,30 @@ jobs:
       # ② CSV結合（ここが今回の追加）
       # =========================
       - name: CSV結合
-      run: |
-        python - <<EOF
-        import pandas as pd
-        import glob
-        import os
-        from datetime import datetime
-    
-        files = glob.glob("*.csv")
-        print("対象ファイル:", files)
-    
-        df_list = []
-    
-        for f in files:
-            df = pd.read_csv(f)
-    
-            # =========================
-            # 地域名をファイル名から取得
-            # =========================
-            area = os.path.basename(f).split("_")[0]
-    
-            df["area"] = area
-    
-            df_list.append(df)
-    
+        run: |
+          python - <<EOF
+          import pandas as pd
+          import glob
+          import os
+          from datetime import datetime
+      
+          files = glob.glob("*.csv")
+          print("対象ファイル:", files)
+      
+          df_list = []
+      
+          for f in files:
+              df = pd.read_csv(f)
+      
+              # =========================
+              # 地域名をファイル名から取得
+              # =========================
+              area = os.path.basename(f).split("_")[0]
+      
+              df["area"] = area
+      
+              df_list.append(df)
+      
         merged = pd.concat(df_list, ignore_index=True)
     
         today = datetime.now().strftime("%Y%m%d")
