@@ -20,18 +20,18 @@ headers = {
 }
 
 # =========================
-# ★ 取得する日（ここが変更点）
+# ★ 取得日（3パターン）
 # =========================
 today = datetime.now()
 
 target_days = [
-    today,                         # 当日
-    today + timedelta(days=3),     # 3日後
-    today + timedelta(days=7)      # 1週間後
+    today,
+    today + timedelta(days=3),
+    today + timedelta(days=7)
 ]
 
 # =========================
-# 日付ごとにループ
+# 日付ループ
 # =========================
 for target in target_days:
 
@@ -47,20 +47,43 @@ for target in target_days:
     while True:
         print(f"ページ: {page}")
 
-        params = {
-            "format": "json",
-            "checkinDate": checkin,
-            "checkoutDate": checkout,
-            "largeClassCode": "japan",
-            "middleClassCode": "hukuoka",
-            "smallClassCode": AREA,
-            "applicationId": APP_ID,
-            "accessKey": ACCESS_KEY,
-            "hits": 30,
-            "page": page
-        }
+        retry_count = 0
 
-        res = requests.get(url, params=params, headers=headers)
+        while True:
+            res = requests.get(url, params={
+                "format": "json",
+                "checkinDate": checkin,
+                "checkoutDate": checkout,
+                "largeClassCode": "japan",
+                "middleClassCode": "hukuoka",
+                "smallClassCode": AREA,
+                "applicationId": APP_ID,
+                "accessKey": ACCESS_KEY,
+                "hits": 30,
+                "page": page
+            }, headers=headers)
+
+            # =========================
+            # ★ 429対策（強化版）
+            # =========================
+            if res.status_code == 429:
+                retry_count += 1
+                wait_time = 10 * retry_count
+                print(f"429エラー → {wait_time}秒待機（{retry_count}回目）")
+                time.sleep(wait_time)
+
+                # 3回以上失敗したら諦める
+                if retry_count >= 3:
+                    print("429多発 → ページスキップ")
+                    break
+                continue
+
+            break
+
+        # 429でスキップされた場合
+        if res.status_code == 429:
+            break
+
         data = res.json()
 
         print("ステータス:", res.status_code)
@@ -92,22 +115,32 @@ for target in target_days:
                             for k, v in room["dailyCharge"].items():
                                 row[f"charge_{k}"] = v
 
-            # ★ 重要：日付と地域
             row["date"] = checkin
             row["area"] = AREA
 
             all_rows.append(row)
 
         page += 1
-        time.sleep(1)
 
+        # =========================
+        # ★ ページ間待機（強化）
+        # =========================
+        time.sleep(3)
+
+        # =========================
+        # ★ ページ上限10
+        # =========================
         if page > 10:
-            print("強制終了")
+            print("ページ上限で終了")
             break
 
     # =========================
-    # ★ 日付ごとに保存
+    # CSV保存
     # =========================
+    if len(all_rows) == 0:
+        print("データなし:", checkin)
+        continue
+
     df = pd.DataFrame(all_rows)
 
     filename = f"{AREA}_{date_str}.csv"
