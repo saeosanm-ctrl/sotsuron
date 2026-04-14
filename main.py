@@ -20,19 +20,24 @@ headers = {
 }
 
 # =========================
-# ★ 複数日ループ（ここが重要）
+# ★ 取得する日（ここが変更点）
 # =========================
 today = datetime.now()
-days = 7  # ← 何日分取るか
 
-for i in range(days):
+target_days = [
+    today,                         # 当日
+    today + timedelta(days=3),     # 3日後
+    today + timedelta(days=7)      # 1週間後
+]
 
-    checkin_date = today + timedelta(days=i+1)
-    checkout_date = today + timedelta(days=i+2)
+# =========================
+# 日付ごとにループ
+# =========================
+for target in target_days:
 
-    checkin = checkin_date.strftime("%Y-%m-%d")
-    checkout = checkout_date.strftime("%Y-%m-%d")
-    date_str = checkin_date.strftime("%Y%m%d")
+    checkin = target.strftime("%Y-%m-%d")
+    checkout = (target + timedelta(days=1)).strftime("%Y-%m-%d")
+    date_str = target.strftime("%Y%m%d")
 
     print(f"===== {AREA} / {checkin} =====")
 
@@ -87,7 +92,7 @@ for i in range(days):
                             for k, v in room["dailyCharge"].items():
                                 row[f"charge_{k}"] = v
 
-            # ★ 日付追加（重要）
+            # ★ 重要：日付と地域
             row["date"] = checkin
             row["area"] = AREA
 
