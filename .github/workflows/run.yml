@@ -2,7 +2,7 @@ name: Run Rakuten API Daily
 
 on:
   schedule:
-    - cron: '0 23 * * *'
+    - cron: '0 23 * * *'   # 日本時間8:00
   workflow_dispatch:
 
 jobs:
@@ -10,15 +10,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: コード取得
+        uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v4
+      - name: Pythonセットアップ
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - run: pip install -r requirements.txt
+      - name: ライブラリインストール
+        run: pip install -r requirements.txt
 
-      - name: 7回ループ実行
+      # =========================
+      # ① 7地域ループ実行
+      # =========================
+      - name: 7地域データ取得
         env:
           RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APP_ID }}
           RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
@@ -29,11 +35,43 @@ jobs:
             AREA=$area python main.py
           done
 
-      - name: CSV保存
+      # =========================
+      # ② CSV結合（ここが今回の追加）
+      # =========================
+      - name: CSV結合
+        run: |
+          python - <<EOF
+          import pandas as pd
+          import glob
+
+          files = glob.glob("*.csv")
+          print("対象ファイル:", files)
+
+          df_list = []
+          for f in files:
+              df = pd.read_csv(f)
+              df_list.append(df)
+
+          merged = pd.concat(df_list, ignore_index=True)
+
+          merged.to_csv("merged.csv", index=False, encoding="utf-8-sig")
+
+          print("結合完了:", len(merged))
+          EOF
+
+      # =========================
+      # ③ 元CSV削除（任意だけどおすすめ）
+      # =========================
+      - name: 元CSV削除
+        run: rm -f fukuoka_*.csv seibu_*.csv kitakyusyu_*.csv chikuzen_*.csv kurume_*.csv buzen_*.csv chikugo_*.csv
+
+      # =========================
+      # ④ GitHubに保存
+      # =========================
+      - name: CSVを保存
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
           git add *.csv
-          git commit -m "add csv" || echo "No changes"
+          git commit -m "add merged csv" || echo "No changes"
           git push
-
