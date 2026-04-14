@@ -37,7 +37,7 @@ for target in target_days:
 
     checkin = target.strftime("%Y-%m-%d")
     checkout = (target + timedelta(days=1)).strftime("%Y-%m-%d")
-    date_str = target.strftime("%Y%m%d-%H%M")
+    date_str = target.strftime("%Y%m%d")
 
     print(f"===== {AREA} / {checkin} =====")
 
