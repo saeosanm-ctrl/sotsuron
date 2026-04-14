@@ -36,3 +36,9 @@ jobs:
           git add *.csv
           git commit -m "add csv" || echo "No changes"
           git push
+
+      - name: CSV削除
+        run: |
+          git rm *.csv
+          git commit -m "delete csv" || echo "No files"
+          git push
