@@ -1,7 +1,7 @@
 import pandas as pd
 import glob
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # =========================
 # データ取得日（今日）
