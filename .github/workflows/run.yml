@@ -42,6 +42,7 @@ jobs:
           do
             echo "Running $area"
             AREA=$area python main.py
+            sleep 15
           done
 
       # =========================
