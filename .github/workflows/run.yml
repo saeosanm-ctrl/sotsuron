@@ -45,45 +45,13 @@ jobs:
           done
 
       # =========================
-      # ⑤ CSV結合（最重要）
+      # ⑤ 日付ごとにマージ（★ここ変更）
       # =========================
-      - name: CSV結合
-        run: |
-          python - <<EOF
-          import pandas as pd
-          import glob
-          import os
-          from datetime import datetime
-          
-          files = glob.glob("*.csv")
-          print("対象ファイル:", files)
-          
-          df_list = []
-          
-          for f in files:
-              df = pd.read_csv(f)
-          
-              # 地域名をファイル名から取得
-              area = os.path.basename(f).split("_")[0]
-              df["area"] = area
-          
-              df_list.append(df)
-          
-          # ===== 結合 =====
-          merged = pd.concat(df_list, ignore_index=True)
-          
-          # ===== 日付付きファイル名 =====
-          today = datetime.now().strftime("%Y%m%d")
-          filename = f"merged_{today}.csv"
-          
-          merged.to_csv(filename, index=False, encoding="utf-8-sig")
-          
-          print("結合完了:", len(merged))
-          print("保存ファイル:", filename)
-          EOF
+      - name: CSV結合（日付ごと）
+        run: python merge.py
 
       # =========================
-      # ⑥ 元CSV削除（スッキリさせる）
+      # ⑥ 元CSV削除（任意）
       # =========================
       - name: 元CSV削除
         run: rm -f fukuoka_*.csv seibu_*.csv kitakyusyu_*.csv chikuzen_*.csv kurume_*.csv buzen_*.csv chikugo_*.csv
@@ -95,6 +63,10 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
+
+          # pullしてからpush（競合防止）
+          git pull origin main --rebase
+
           git add *.csv
           git commit -m "add merged csv" || echo "No changes"
           git push
