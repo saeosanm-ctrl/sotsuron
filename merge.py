@@ -11,7 +11,7 @@ today = (datetime.utcnow()+timedelta(hours=9)).strftime("%Y%m%d_%H%M")
 # =========================
 # CSV取得
 # =========================
-files = glob.glob("*.csv")
+files = [f for f in glob.glob("*.csv") if not f.startswith("merged-")]
 print("対象ファイル:", files)
 
 # =========================
