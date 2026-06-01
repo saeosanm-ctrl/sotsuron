@@ -68,9 +68,3 @@ jobs:
           git commit -m "add merged csv" || echo "No changes"
       
           git push --force
-
-      - name: CSV削除
-        run: |
-          git rm *.csv
-          git commit -m "delete csv" || echo "No files"
-          git push
